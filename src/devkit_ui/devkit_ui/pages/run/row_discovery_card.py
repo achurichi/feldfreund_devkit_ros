@@ -10,6 +10,14 @@ class RowDiscoveryCard(ui.card):
                  state: RunViewModel.Discovery,
                  on_start: Callable[[], None],
                  on_stop: Callable[[], None]):
+        """
+                 Initialize the row discovery card with its state and lifecycle callbacks.
+                 
+                 Parameters:
+                     state (RunViewModel.Discovery): Discovery state bound to the card controls.
+                     on_start (Callable[[], None]): Callback invoked after discovery is confirmed.
+                     on_stop (Callable[[], None]): Callback invoked when discovery is disabled.
+                 """
         super().__init__()
 
         self._state = state
@@ -31,7 +39,7 @@ class RowDiscoveryCard(ui.card):
             )
 
             with ui.row().classes('items-center gap-2'):
-                discovery_checkbox = ui.checkbox('Discovery mode').bind_value(
+                discovery_checkbox = ui.checkbox('Discovery mode').bind_value_from(
                     self._state, 'active'
                 )
                 ui.label().classes('text-xs font-mono ml-2').bind_text_from(
@@ -39,6 +47,12 @@ class RowDiscoveryCard(ui.card):
                 )
 
             async def _on_discovery_change(e, _cb=discovery_checkbox) -> None:
+                """Handle changes to the row-discovery activation checkbox.
+                
+                When enabling discovery, request confirmation that the person-detection safety
+                system is active before starting. Cancelled or declined confirmation resets the
+                checkbox; disabling discovery stops the process.
+                """
                 if e.args:  # ticked on
                     with ui.dialog() as d, ui.card():
                         ui.label(
